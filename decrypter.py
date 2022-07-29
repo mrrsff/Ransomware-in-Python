@@ -1,9 +1,10 @@
 import os
 import shutil
-
 from cryptography.fernet import Fernet
 
 os.system('CLS')
+
+def decryptFiles(dir="Encrypted"):
 
 if not os.path.exists("Encrypted"):
     print("No encrpted file found. Terminating program.")
@@ -37,6 +38,8 @@ if not os.path.exists("Decrypted"):
 
 for i in range(len(files)):
     print(i+1, "of", len(files), "recovered.", end="\r")
+    if os.path.isdir("Decrypted\\" + files[i][:-6]):
+        decryptFiles("Decrypted\\" + files[i][:-6])
     with open("Decrypted\\" + files[i][:-6], "wb") as decrypted:
         with open("Encrypted\\"+files[i]) as locked:
             _data = bytes(locked.read(), "utf-16")
